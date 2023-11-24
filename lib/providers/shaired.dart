@@ -6,5 +6,6 @@ import 'package:learn/repositories/connectivity/connectivity_repository.dart';
 final connectivityRepositoryProvider =
     Provider<ConnectivityRepository>((ref) => ConnectivityRepository());
 
-final connectivityControllerProvider = AutoDisposeAsyncNotifierProvider<
-    ConnectivityController, ConnectivityResult>(() => ConnectivityController());
+final connectivityControllerProvider =
+    AsyncNotifierProvider<ConnectivityController, ConnectivityResult>(
+        () => ConnectivityController());

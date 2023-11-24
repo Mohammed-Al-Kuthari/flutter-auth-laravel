@@ -4,8 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:learn/providers/shaired.dart';
 
-class ConnectivityController
-    extends AutoDisposeAsyncNotifier<ConnectivityResult> {
+class ConnectivityController extends AsyncNotifier<ConnectivityResult> {
   @override
   FutureOr<ConnectivityResult> build() {
     return _checkConn();
