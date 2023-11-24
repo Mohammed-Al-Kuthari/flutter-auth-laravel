@@ -9,3 +9,8 @@ final connectivityRepositoryProvider =
 final connectivityControllerProvider =
     AsyncNotifierProvider<ConnectivityController, ConnectivityResult>(
         () => ConnectivityController());
+
+final connectivityStreamProvider = StreamProvider<ConnectivityResult>((ref) {
+  final connectivityRepository = ref.read(connectivityRepositoryProvider);
+  return connectivityRepository.listenConnectivity();
+});

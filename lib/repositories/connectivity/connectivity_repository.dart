@@ -5,4 +5,8 @@ class ConnectivityRepository {
     await Future.delayed(const Duration(seconds: 2));
     return (Connectivity().checkConnectivity());
   }
+
+  Stream<ConnectivityResult> listenConnectivity() {
+    return Connectivity().onConnectivityChanged;
+  }
 }

@@ -9,6 +9,7 @@ class ButtonPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final connectivityProvicer = ref.watch(connectivityControllerProvider);
+    final connectivityStreamProvicer = ref.watch(connectivityStreamProvider);
     ThemeData currentTheme = Theme.of(context);
 
     return Scaffold(
@@ -21,7 +22,34 @@ class ButtonPage extends ConsumerWidget {
         children: <Widget>[
           Center(
             child: connectivityProvicer.when(
-              data: (data) => Text("data: ${data.toString()}"),
+              data: (data) => Column(
+                children: <Widget>[
+                  const SizedBox(height: 32),
+                  Text("Connnect wuth: ${data.toString().split('.').last}"),
+                ],
+              ),
+              error: (e, _) => Column(
+                children: <Widget>[
+                  const SizedBox(height: 32),
+                  Text("Connnect wuth: ${e.toString()}"),
+                ],
+              ),
+              loading: () => const Column(
+                children: <Widget>[
+                  SizedBox(height: 32),
+                  CircularProgressIndicator(),
+                ],
+              ),
+            ),
+          ),
+          Center(
+            child: connectivityStreamProvicer.when(
+              data: (data) => Column(
+                children: <Widget>[
+                  const SizedBox(height: 16),
+                  Text("Connnect wuth: ${data.toString().split('.').last}"),
+                ],
+              ),
               error: (e, _) => const Text('error'),
               loading: () => const Center(child: CircularProgressIndicator()),
             ),
