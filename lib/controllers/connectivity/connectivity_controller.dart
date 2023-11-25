@@ -11,7 +11,7 @@ class ConnectivityController extends AsyncNotifier<ConnectivityResult> {
   }
 
   Future<ConnectivityResult> _checkConn() {
-    final connectivityRepository = ref.read(connectivityRepositoryProvider);
+    final connectivityRepository = ref.read(connectivityServiceProvider);
     return connectivityRepository.checkConnectivity();
   }
 
