@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:learn/exceptions/connectivity/connectivity_exception.dart';
 import 'package:learn/providers/shaired.dart';
 
 class ButtonPage extends ConsumerWidget {
@@ -8,6 +9,18 @@ class ButtonPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen(connectivityStreamProvider, (previous, next) {
+      next.whenOrNull(error: (err, _) {
+        return ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: err is ConnectivityExption
+                ? Text(err.getMessage())
+                : const Text("Unknown Error"),
+          ),
+        );
+      });
+    });
+
     final connectivityProvicer = ref.watch(connectivityControllerProvider);
     final connectivityStreamProvicer = ref.watch(connectivityStreamProvider);
     ThemeData currentTheme = Theme.of(context);
@@ -25,13 +38,15 @@ class ButtonPage extends ConsumerWidget {
               data: (data) => Column(
                 children: <Widget>[
                   const SizedBox(height: 32),
-                  Text("Connnect wuth: ${data.toString().split('.').last}"),
+                  Text("Connnect wuth: ${data.toString()}"),
                 ],
               ),
-              error: (e, _) => Column(
+              error: (err, _) => Column(
                 children: <Widget>[
                   const SizedBox(height: 32),
-                  Text("Connnect wuth: ${e.toString()}"),
+                  err is ConnectivityExption
+                      ? Text(err.getMessage())
+                      : const Text("Unknown Error"),
                 ],
               ),
               loading: () => const Column(
@@ -43,15 +58,16 @@ class ButtonPage extends ConsumerWidget {
             ),
           ),
           Center(
-            child: connectivityStreamProvicer.when(
+            child: connectivityStreamProvicer.whenOrNull(
               data: (data) => Column(
                 children: <Widget>[
                   const SizedBox(height: 16),
                   Text("Connnect wuth: ${data.toString().split('.').last}"),
                 ],
               ),
-              error: (e, _) => const Text('error'),
-              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, _) => err is ConnectivityExption
+                  ? Text(err.getMessage())
+                  : const Text("Unknown Error"),
             ),
           ),
           Expanded(
@@ -60,16 +76,21 @@ class ButtonPage extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: LoadingButton(
-                        onClick: ref
-                            .read(connectivityControllerProvider.notifier)
-                            .checkConnectivity,
-                      ),
+                  FilledButton.tonal(
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(22),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
+                    onPressed: () {},
+                    child: const Text("Start"),
+                  ),
+                  const SizedBox(
+                    width: 12,
+                  ),
+                  LoadingButton(
+                    onClick: ref
+                        .read(connectivityControllerProvider.notifier)
+                        .checkConnectivity,
                   ),
                 ],
               ),
@@ -109,16 +130,16 @@ class _LoadingButtonState extends State<LoadingButton> {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 20),
-        // textStyle: Theme.of(context).textTheme.titleMedium,
+        minimumSize: const Size.fromHeight(16),
+        textStyle: Theme.of(context).textTheme.titleMedium,
       ),
       onPressed: isLoading ? null : pay,
       child: isLoading
-          ? const SizedBox(
-              width: 20,
-              height: 20,
+          ? const SizedBox.square(
+              dimension: 20,
               child: CircularProgressIndicator(),
             )
-          : const Text('Submit'),
+          : const Text('Refresh'),
     );
   }
 }
