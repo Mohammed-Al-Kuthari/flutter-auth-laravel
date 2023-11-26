@@ -3,7 +3,7 @@ class User {
   final String name;
   final String? email;
   final String phone;
-  final String countryCode;
+  final int countryCode;
 
   const User({
     required this.id,
@@ -18,6 +18,6 @@ class User {
         name: data['name'],
         email: data['email'],
         phone: data['phone'],
-        countryCode: data['countryCode'],
+        countryCode: data['country_code'],
       );
 }

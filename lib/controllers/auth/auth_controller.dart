@@ -31,5 +31,10 @@ class AuthController extends AsyncNotifier<bool> {
     }
   }
 
+  Future<void> logout() {
+    final tokenStorage = ref.read(secureTokenStorageProvider);
+    return tokenStorage.clear();
+  }
+
   Future<bool> isSignedIn() => getSignInToken().then((token) => token != null);
 }

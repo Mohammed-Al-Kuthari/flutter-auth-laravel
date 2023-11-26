@@ -15,9 +15,12 @@ class AuthService {
   }
 
   Future<User> getUser(String token) async {
-    String path = '/user';
-    requester.dio.options.headers["Authorization"] = "Bearer $token";
-    Response response = await requester.dio.post(path);
+    final response = await requester.dio.get(
+      '/user',
+      options: Options(
+        headers: {'Authorization': "Bearer $token"},
+      ),
+    );
     return User.fromJson(response.data);
   }
 }

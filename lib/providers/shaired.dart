@@ -6,6 +6,7 @@ import 'package:learn/controllers/auth/auth_controller.dart';
 import 'package:learn/controllers/connectivity/connectivity_controller.dart';
 import 'package:learn/infrastructure/credential_storage/secure_token_storage.dart';
 import 'package:learn/infrastructure/requester/requester.dart';
+import 'package:learn/models/user.dart';
 import 'package:learn/services/auth/auth_service.dart';
 import 'package:learn/services/connectivity/connectivity_service.dart';
 
@@ -48,3 +49,13 @@ final authServiceProvider = Provider<AuthService>(
 final authControllerProvider = AsyncNotifierProvider<AuthController, bool>(
   () => AuthController(),
 );
+
+final fetchUserProvider = FutureProvider<User?>((ref) async {
+  final tokenStorage = ref.read(secureTokenStorageProvider);
+  String? token = await tokenStorage.read();
+  if (token != null) {
+    final authService = ref.read(authServiceProvider);
+    return authService.getUser(token);
+  }
+  return null;
+});

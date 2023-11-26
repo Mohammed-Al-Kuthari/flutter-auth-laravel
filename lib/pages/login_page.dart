@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:learn/pages/home_page.dart';
 import 'package:learn/providers/shaired.dart';
 
 class LoginPage extends StatelessWidget {
@@ -95,7 +96,12 @@ class _TextSubmitWidgetState extends ConsumerState<TextSubmitWidget> {
           if (isAuth) {
             errorEmailText = null;
             errorPassText = null;
-            // go to home screen
+
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (BuildContext context) => const HomePage(),
+              ),
+            );
           }
         },
       );
