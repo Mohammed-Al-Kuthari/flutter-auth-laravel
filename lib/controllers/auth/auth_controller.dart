@@ -1,29 +1,35 @@
-import 'dart:async';
-
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:learn/providers/shaired.dart';
 
-class AuthController extends AsyncNotifier<String?> {
+class AuthController extends AsyncNotifier<bool> {
   @override
-  FutureOr<String?> build() {
-    return null;
+  Future<bool> build() {
+    return isSignedIn();
   }
 
   Future<void> singIn(String email, String password) async {
     final authService = ref.read(authServiceProvider);
-    state = const AsyncLoading();
-    await authService.signIn(email, password);
-    state = const AsyncValue.data("done");
-  }
-
-  Future<void> checkUser() async {
-    state = const AsyncLoading();
     final tokenStorage = ref.read(secureTokenStorageProvider);
-    if (await tokenStorage.read() != null) {
-      // TODO: implements get user from api
-      // return null; // for now
+    try {
+      state = const AsyncLoading();
+      String token = await authService.signIn(email, password);
+      await tokenStorage.save(token);
+      state = const AsyncData(true);
+    } on DioException catch (e, stack) {
+      state = AsyncError(e, stack);
     }
-
-    // return null;
   }
+
+  Future<String?> getSignInToken() async {
+    final tokenStorage = ref.read(secureTokenStorageProvider);
+    final storedToken = await tokenStorage.read();
+    if (storedToken != null) {
+      return storedToken;
+    } else {
+      return null;
+    }
+  }
+
+  Future<bool> isSignedIn() => getSignInToken().then((token) => token != null);
 }

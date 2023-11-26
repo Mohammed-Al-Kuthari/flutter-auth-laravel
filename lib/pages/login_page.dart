@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:learn/providers/shaired.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -30,8 +32,11 @@ class TextSubmitWidget extends ConsumerStatefulWidget {
 class _TextSubmitWidgetState extends ConsumerState<TextSubmitWidget> {
   final _emailController = TextEditingController();
   final _passController = TextEditingController();
-
   final _formKey = GlobalKey<FormState>();
+
+  String? errorEmailText;
+  String? errorPassText;
+
   bool _isSubmitted = false;
   bool _isSubmitting = false;
 
@@ -42,28 +47,6 @@ class _TextSubmitWidgetState extends ConsumerState<TextSubmitWidget> {
     super.dispose();
   }
 
-  String? get _emailErrorText {
-    final text = _emailController.value.text;
-    if (text.isEmpty) {
-      return 'Error: Can\'t be empty';
-    }
-    if (text.length < 4) {
-      return 'Error: Too short';
-    }
-    return null;
-  }
-
-  String? get _passErrorText {
-    final text = _passController.value.text;
-    if (text.isEmpty) {
-      return 'Error: Can\'t be empty';
-    }
-    if (text.length < 4) {
-      return 'Error: Too short';
-    }
-    return null;
-  }
-
   void _submit() async {
     final form = _formKey.currentState!;
     setState(() {
@@ -72,20 +55,51 @@ class _TextSubmitWidgetState extends ConsumerState<TextSubmitWidget> {
     });
     if (form.validate()) {
       form.save();
-
-      final formData = {
-        'email': _emailController.value.text,
-        'password': _passController.value.text,
-      };
-
-      await Future.delayed(const Duration(seconds: 2));
-      debugPrint(formData.toString());
+      await ref
+          .read(authControllerProvider.notifier)
+          .singIn(_emailController.value.text, _passController.value.text);
     }
     setState(() => _isSubmitting = false);
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(authControllerProvider, (previous, next) {
+      next.whenOrNull(
+        error: (err, st) {
+          if (err is DioException && err.response!.data['errors'] != null) {
+            var errorList = err.response!.data['errors'];
+
+            if (errorList['email'] != null) {
+              errorEmailText = errorList['email'] is List
+                  ? errorList['email'].first
+                  : errorList['email'];
+            } else if (errorList['invalid_login'] != null) {
+              errorEmailText = errorList['invalid_login'] is List
+                  ? errorList['invalid_login'].first
+                  : errorList['invalid_login'];
+            } else {
+              errorEmailText = null;
+            }
+
+            if (errorList['password'] != null) {
+              errorPassText = errorList['password'] is List
+                  ? errorList['password'].first
+                  : errorList['password'];
+            } else {
+              errorPassText = null;
+            }
+          }
+        },
+        data: (bool isAuth) async {
+          if (isAuth) {
+            errorEmailText = null;
+            errorPassText = null;
+            // go to home screen
+          }
+        },
+      );
+    });
     return Form(
       key: _formKey,
       child: Column(
@@ -98,7 +112,7 @@ class _TextSubmitWidgetState extends ConsumerState<TextSubmitWidget> {
               label: "Enter your email",
               controller: _emailController,
               isSubmitted: _isSubmitted,
-              errorText: _emailErrorText,
+              errorText: errorEmailText,
               validator: (text) {
                 if (text == null || text.isEmpty) {
                   return 'validator: Can\'t be empty';
@@ -116,7 +130,7 @@ class _TextSubmitWidgetState extends ConsumerState<TextSubmitWidget> {
               label: "Enter your password",
               controller: _passController,
               isSubmitted: _isSubmitted,
-              errorText: _passErrorText,
+              errorText: errorPassText,
               validator: (text) {
                 if (text == null || text.isEmpty) {
                   return 'validator: Can\'t be empty';

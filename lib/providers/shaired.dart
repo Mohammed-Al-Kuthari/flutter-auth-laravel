@@ -2,6 +2,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:learn/controllers/auth/auth_controller.dart';
 import 'package:learn/controllers/connectivity/connectivity_controller.dart';
 import 'package:learn/infrastructure/credential_storage/secure_token_storage.dart';
 import 'package:learn/infrastructure/requester/requester.dart';
@@ -30,7 +31,7 @@ final secureTokenStorageProvider = Provider<SecureTokenStorage>(
 
 final dioProvider = Provider<Dio>(
   (ref) => Dio(BaseOptions(
-    baseUrl: "https://tedllal.vercel.app/api/v1/auth/login",
+    baseUrl: "https://tedllal.vercel.app/api/v1",
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json",
@@ -43,4 +44,7 @@ final requesterProvider =
 
 final authServiceProvider = Provider<AuthService>(
   (ref) => AuthService(ref.read(requesterProvider)),
+);
+final authControllerProvider = AsyncNotifierProvider<AuthController, bool>(
+  () => AuthController(),
 );

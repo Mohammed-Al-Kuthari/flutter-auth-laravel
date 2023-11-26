@@ -1,23 +1,23 @@
-import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
 import 'package:learn/infrastructure/requester/requester.dart';
+import 'package:learn/models/user.dart';
 
 class AuthService {
   final Requester requester;
 
   AuthService(this.requester);
 
-  Future<void> signIn(String email, String password) async {
+  Future<String> signIn(String email, String password) async {
     String path = '/auth/login';
     Map<String, dynamic> body = {'email': email, 'password': password};
-    final response = await requester.post(path, body);
-
-    debugPrint(response.toString());
+    Response response = await requester.post(path, body);
+    return response.data['access_token'] as String;
   }
 
-  Future<void> getUser(String token) async {
+  Future<User> getUser(String token) async {
     String path = '/user';
     requester.dio.options.headers["Authorization"] = "Bearer $token";
-    final response = await requester.post(path, {});
-    debugPrint(response.toString());
+    Response response = await requester.dio.post(path);
+    return User.fromJson(response.data);
   }
 }
